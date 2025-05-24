@@ -26,13 +26,23 @@ async function runQueryExamples() {
     try{
 
         //create a new document
-        const newUser = await User.create({
-            name: "John Doe",
-            email: "johndoe@email.com",
-            age: 34,
-            isActive: true,
-            tags: ['developer', 'designer', 'manager'],
+        // const newUser = await User.create({
+        //     name: "Kevin Doe",
+        //     email: "Kendoe@email.com",
+        //     age: 34,
+        //     isActive: true,
+        //     tags: ['developer', 'designer', 'manager'],
+        // });
+
+        const newUser = new User({
+          name: "Kevin Doe",
+          email: "Kendoe@email.com",
+          age: 34,
+          isActive: true,
+          tags: ["developer", "designer", "manager"],
         });
+
+        await newUser.save()
 
         console.log("New user created successfully", newUser);
 
