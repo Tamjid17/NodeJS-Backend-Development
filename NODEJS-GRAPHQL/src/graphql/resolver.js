@@ -1,44 +1,27 @@
-const products = require('../data/products');
+const Product = require('../models/Product')
 
 const resolvers = {
     Query : {
-        products:() => products,
-        product : (_, {id}) => products.find(item => item.id === id)
+        products: async () => await Product.find({}),
+        product : async (_, {id}) => await Product.findById(id)
     },
     Mutation: {
-        createProduct: (_, {title, category, price, inStock}) => {
-            const newlyCreatedProduct = {
-                id: String(products.length + 1),
-                title,
-                category,
-                price,
-                inStock
-            } 
+        createProduct: async(_,args) => {
+            const newlyCreatedProduct = new Product(args); 
 
-            products.push(newlyCreatedProduct);
-            return newlyCreatedProduct;
+            return await newlyCreatedProduct.save();
         },
 
-        deleteProduct: (_, {id}) => {
-            const index = products.findIndex(product => product.id === id);
-            if(index === -1) return false;
-            products.splice(index, 1);
-            return true;
+        deleteProduct: async (_, {id}) => {
+            const deletedProduct =  await Product.findByIdAndDelete(id);
+
+            return !!deletedProduct;
         },
-        
-        updateProduct: (_, {id, ...updates}) => {
-            const index = products.findIndex((product) => product.id === id);
-            if (index === -1) return null;
 
-            const updateProduct = {
-                ...products[index], ...updates
-            }
-
-            products[index] = updateProduct;
-            
-            return updateProduct;
+        updateProduct: async(_, {id, ...updatedFields}) => {
+            return await Product.findByIdAndUpdate(id, updatedFields, {new : true})
         }
-    }
+     }
 };
 
 module.exports = resolvers;
