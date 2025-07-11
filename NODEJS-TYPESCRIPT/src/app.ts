@@ -1,75 +1,60 @@
-console.log('Hello Node js from typescript');
+import express, {Express, NextFunction, Request, Response} from 'express'
+import { IUser, User } from './models/User';
 
-// basic types
+const app: Express = express();
+const port = 3000;
 
-let isDone : Boolean = false;
+app.use(express.json());
 
-let num : number = 100;
-
-let str : string = "Rex";
-
-let list : number[] = [1, 2, 3];
-
-let fruits : string[] = ["apple", "banana", "grape"];
-                //|
-let flowers : Array<string> = ["lily", "rose", "sunflower"];
-
-let randomValue : any = 1;
-
-randomValue = "abcd"
-randomValue = false
-
-let xyz : undefined = undefined;
-
-let pqr: null = null;
-
-enum Color {
-    Red, Green, Blue
+interface CustomRequest extends Request{
+    startTime?: number
 }
 
-let d: Color = Color.Green;
+// middleware -> add startTime to request
+app.use((req: CustomRequest, res: Response, next: NextFunction) => {
+    req.startTime = Date.now();
+    next();
+});
 
-// special type
-
-let abc : [string, number] = ["Hello", 2025];
-
-//interface, types
+// post route -> new user -> name, email -> req.body
+// -> /user/:id -> Request <{}, {}, {}>
 
 interface User {
-    name: String,
-    id: number,
-    email?: string // question mark indicates that the field is optional
-    readonly createdAt: Date
+    name: string,
+    email:  string
 }
 
-const user : User = {
-    name : "Bob",
-    id : 1,
-    createdAt: new Date(),
-    email : "abc@gmail.com"
-}
+app.post('/user', (req: Request<{}, {}, User>, res: Response) => {
+    const {name, email} = req.body;
+    res.json({
+        message: `User created ${name}-${email}`
+    })
+})
 
-type Product = {
-    title : string,
-    price : number
-}
+// users based on id
+app.get('/users/:id', (req: Request<{id: string}>, res: Response) => {
+    const {id} = req.params;
+    res.json({
+        userId : id,
+    });
+})
 
-const product1: Product = {
-    title: "Product 1",
-    price: 200
-}
+app.get('/', (req: Request, res: Response) => {
+    res.send("Hello World");
+});
 
+app.get('/users', async(req: Request, res: Response) => {
+    try {
 
-// function with type annotations
+        const users: IUser[] = await User.find();
+        res.json({
+            data : users
+        })
+    } catch(e) {
 
-function add(a: number, b: number): number {
-    return a + b;
-}
+    }
+})
 
-const multiply = (a: number, b: number) : number => {
-    return a * b;
-};
-
-function greet(name: string, greeting?: string): string {
-    return `${name} ${greeting}`;
-}
+app.listen(port, () => {
+    console.log(`Server is now running on port ${port}`);
+})
